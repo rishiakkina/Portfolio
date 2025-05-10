@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rishyendra Akkina - Portfolio v2.1</title> {/* Updated version */}
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;700&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0A0F14; /* Dark blue-grey, almost black */
+            --card-bg-color: #10161D; /* Slightly lighter */
+            --primary-text-color: #D0D0D5; /* Off-white */
+            --secondary-text-color: #808A94; /* Muted Grey */
+            --accent-color: #3B82F6; /* A calm, friendly blue */
+            --border-color: #2A3038; /* Subtle border color */
+            --font-display: 'Oxanium', cursive;
+            --font-body: 'JetBrains Mono', monospace;
+            /* Removed glow variables and accent-color-alt */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--primary-text-color);
+            line-height: 1.7;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            cursor: none; /* Hide default cursor */
+        }
+
+        /* Custom Cursor - Simplified */
+        .cursor-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-text-color); /* Start as primary text color */
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease-out, width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+        }
+        .cursor-outline {
+            width: 25px;
+            height: 25px;
+            border: 1px solid var(--accent-color);
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.15s ease-out, width 0.3s ease, height 0.3s ease, opacity 0.3s ease, border-color 0.2s ease;
+        }
+        body:hover .cursor-dot { opacity: 1; }
+        body:hover .cursor-outline { opacity: 1; }
+
+        /* Elements that interact with cursor - Simplified */
+        a:hover ~ .cursor-dot, button:hover ~ .cursor-dot, .tab-button:hover ~ .cursor-dot, .skill-item:hover ~ .cursor-dot, .project-card:hover ~ .cursor-dot {
+            transform: translate(-50%, -50%) scale(2.5);
+            background-color: var(--accent-color); /* Dot turns accent color */
+        }
+        a:hover ~ .cursor-outline, button:hover ~ .cursor-outline, .tab-button:hover ~ .cursor-outline, .skill-item:hover ~ .cursor-outline, .project-card:hover ~ .cursor-outline {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.7;
+        }
+
+
+        /* Scanline Overlay Removed */
+        /* body::after { ... } */
+
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(10, 15, 20, 0.75); /* Using new bg-color values with alpha */
+            backdrop-filter: blur(10px); /* Slightly less blur for cleaner look */
+            z-index: 1000;
+            padding: 15px 5%;
+            border-bottom: 1px solid var(--border-color); /* Subtle border */
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-text-color);
+            text-shadow: none; /* Removed glow */
+            transition: color 0.3s ease;
+        }
+        .logo:hover {
+             color: var(--accent-color);
+             /* Glitch effect handled by JS */
+        }
+
+
+        nav ul { list-style: none; display: flex; }
+        nav ul li { margin-left: 30px; }
+        nav ul li a {
+            font-family: var(--font-display);
+            text-decoration: none;
+            color: var(--secondary-text-color);
+            font-weight: 400;
+            font-size: 1.1rem;
+            transition: color 0.3s ease; /* Removed text-shadow transition */
+            position: relative;
+            padding-bottom: 8px;
+        }
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-color);
+            box-shadow: none; /* Removed glow */
+            transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        nav ul li a:hover, nav ul li a.active-link {
+            color: var(--accent-color);
+            text-shadow: none; /* Removed glow */
+        }
+        nav ul li a:hover::after, nav ul li a.active-link::after {
+            width: 100%;
+        }
+
+        .mobile-nav-toggle { display: none; font-size: 2rem; background: none; border: none; color: var(--accent-color); cursor: pointer; }
+
+        #hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-top: 100px;
+            overflow: hidden;
+        }
+
+        #three-canvas-hero {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .hero-text { max-width: 65%; }
+        .hero-text h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-text-color);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .hero-text h1 .name {
+            color: var(--accent-color);
+            display: inline-block;
+            text-shadow: none; /* Removed glow */
+        }
+        .hero-text .intro-sentence { margin-bottom: 20px; font-size: 1.1rem; }
+        .hero-text .tagline { margin-bottom: 25px; font-style: normal; color: var(--secondary-text-color); font-size: 1.1rem; }
+
+        .social-links a, .leetcode-link {
+            display: inline-block;
+            margin-right: 10px;
+            margin-top:10px;
+            padding: 10px 18px;
+            border: 1px solid var(--border-color); /* Using subtle border color */
+            border-radius: 5px;
+            text-decoration: none;
+            color: var(--secondary-text-color); /* More subtle text color */
+            font-family: var(--font-body);
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+            box-shadow: none; /* Removed glow */
+        }
+        .social-links a:hover, .leetcode-link:hover {
+            background-color: transparent; /* No background fill */
+            color: var(--accent-color);
+            border-color: var(--accent-color); /* Accent border on hover */
+            box-shadow: none; /* Removed glow */
+            transform: translateY(-2px); /* Less dramatic transform */
+        }
+
+        .hero-illustration-container {
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+
+        section { padding: 80px 0; border-bottom: 1px solid var(--border-color); }
+        section:last-of-type { border-bottom: none; }
+
+        h2.section-title {
+            font-family: var(--font-display);
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 50px;
+            color: var(--primary-text-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+            text-shadow: none; /* Removed glow */
+        }
+        h2.section-title::after {
+            content: ''; display: block; width: 80px; height: 3px;
+            background: var(--accent-color); /* Solid accent color */
+            margin: 10px auto 0;
+            border-radius: 2px;
+            box-shadow: none; /* Removed glow */
+        }
+
+        .tabs { display: flex; justify-content: center; margin-bottom: 40px; }
+        .tab-button {
+            padding: 10px 20px; /* Slightly smaller */
+            cursor: pointer; background-color: transparent;
+            border: 1px solid var(--border-color); color: var(--secondary-text-color);
+            margin: 0 8px; border-radius: 5px; /* Less rounded */
+            font-family: var(--font-body); font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .tab-button.active {
+            background-color: var(--accent-color); color: var(--bg-color); /* Or a very light text color for contrast with accent */
+            border-color: var(--accent-color);
+            box-shadow: none; transform: scale(1.0); /* No scale or very subtle */
+        }
+        .tab-button:hover:not(.active) {
+            border-color: var(--accent-color); color: var(--accent-color);
+            box-shadow: none; /* Removed glow */
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; } /* Reduced gap */
+        .skill-item {
+            background-color: var(--card-bg-color); padding: 20px; border-radius: 5px;
+            text-align: center; font-weight: bold;
+            border: 1px solid var(--border-color);
+            box-shadow: none; /* Removed shadow */
+            transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+            /* Removed transform-style: preserve-3d; and perspective from hover for flatter look */
+        }
+        .skill-item:hover {
+            transform: translateY(-3px); /* Simpler transform */
+            border-color: var(--accent-color);
+            background-color: #151B23; /* Slightly darker/different card bg on hover */
+            /* Removed perspective rotations and complex box-shadow */
+        }
+
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; } /* Reduced gap */
+        .project-card {
+            background-color: var(--card-bg-color); border-radius: 5px; padding: 25px;
+            border-top: 3px solid var(--accent-color); /* Changed border to top */
+            box-shadow: none; /* Removed shadow */
+            transition: transform 0.2s ease, background-color 0.2s ease, border-top-color 0.2s ease;
+            /* Removed transform-style and overflow: hidden unless needed */
+        }
+        .project-card:hover {
+            transform: translateY(-5px); /* Simpler transform */
+            background-color: #151B23; /* Slightly darker/different card bg */
+            border-top-color: var(--accent-color); /* Keep accent color for top border, maybe slightly brighter on hover if possible, or just keep */
+            /* Removed perspective rotation and complex box-shadow */
+        }
+        .project-card h3 {
+            font-family: var(--font-display); color: var(--accent-color);
+            margin-bottom: 12px; font-size: 1.5rem; text-shadow: none; /* Removed glow */
+        }
+        .project-card p { font-size: 0.95rem; margin-bottom: 20px; color: var(--secondary-text-color); line-height: 1.7; } /* Slightly reduced line height */
+        .project-tags span {
+            display: inline-block; background-color: rgba(59, 130, 246, 0.1); /* accent-color with alpha */
+            color: var(--accent-color); padding: 5px 10px; border-radius: 3px;
+            font-size: 0.8rem; margin-right: 8px; margin-bottom: 8px; font-weight: normal; /* Less bold */
+        }
+        .project-links a {
+            display: inline-block; background-color: transparent;
+            border: 1px solid var(--border-color); color: var(--secondary-text-color);
+            padding: 8px 15px; border-radius: 3px; text-decoration: none;
+            font-weight: bold; margin-top: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
+        .project-links a:hover {
+            border-color: var(--accent-color); color: var(--accent-color);
+            background-color: rgba(59, 130, 246, 0.05); /* Very subtle accent background */
+            transform: scale(1.03); /* Subtle scale */
+            box-shadow: none;
+        }
+
+        #contact-form {
+            max-width: 750px; margin: 0 auto; background-color: var(--card-bg-color);
+            padding: 35px; border-radius: 5px; box-shadow: none; /* Removed shadow */
+            border: 1px solid var(--border-color);
+        }
+        .form-group { margin-bottom: 20px; } /* Reduced margin */
+        .form-group label { display: block; margin-bottom: 8px; color: var(--secondary-text-color); font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;}
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 12px; border-radius: 3px; /* Smaller padding/radius */
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color); /* Darker input bg */
+            color: var(--primary-text-color); font-size: 1rem; font-family: var(--font-body);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--accent-color);
+            box-shadow: none; /* Removed glow/shadow on focus, border highlight is enough */
+        }
+        .name-group { display: flex; gap: 20px; } /* Reduced gap */
+        .name-group .form-group { flex: 1; }
+        .submit-btn {
+            display: inline-block; padding: 12px 25px; /* Smaller padding */
+            background-color: var(--accent-color); /* Solid accent color */
+            color: #FFFFFF; /* Ensure high contrast */
+            border: none; border-radius: 3px;
+            cursor: pointer; font-size: 1rem; font-weight: bold;
+            font-family: var(--font-display); text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: none; /* Removed shadow */
+        }
+        .submit-btn:hover {
+            background-color: #2563EB; /* Slightly darker shade of accent */
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: none; /* Removed shadow */
+        }
+
+        footer { text-align: center; padding: 30px 0; margin-top: 40px; font-size: 0.9rem; color: var(--secondary-text-color); border-top: 1px solid var(--border-color);}
+
+        .scroll-reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; } /* Adjusted transition */
+        .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-text { max-width: 100%; text-align: center; }
+            .hero-content { flex-direction: column-reverse; gap: 30px; }
+            .hero-illustration-container { width: 230px; height: 230px; margin-bottom:25px; }
+            .hero-text h1 { font-size: 2.8rem; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 12px 3%; }
+            nav ul { background-color: var(--card-bg-color); top: 60px; /* Adjust based on new header height */ }
+            .logo { font-size: 1.8rem; }
+            .mobile-nav-toggle { display: block; }
+            .hero-text h1 { font-size: 2.3rem; }
+            .hero-illustration-container { width: 180px; height: 180px; }
+            .skills-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+            .projects-grid { grid-template-columns: 1fr; }
+            .name-group { flex-direction: column; gap: 0; }
+            h2.section-title { font-size: 2rem; }
+            .container { width: 95%; }
+        }
+        @media (max-width: 480px) {
+            body { cursor: auto; }
+            .cursor-dot, .cursor-outline { display: none; }
+            .hero-text h1 { font-size: 1.9rem; }
+            .social-links a, .leetcode-link { font-size: 0.85rem; padding: 7px 10px;}
+            .tab-button { padding: 8px 15px; font-size: 0.8rem; }
+            section { padding: 60px 0; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <header>
+        <div class="logo glitch-text" data-text="中">中</div>
+        <nav>
+            <button class="mobile-nav-toggle" aria-label="Toggle navigation">☰</button>
+            <ul id="nav-links">
+                <li><a href="#hero" class="nav-link">Home</a></li>
+                <li><a href="#skills" class="nav-link">Skills</a></li>
+                <li><a href="#projects" class="nav-link">Projects</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="hero">
+        <div id="three-canvas-hero"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1><span class="anime-lines-κάλύτερα">Hello, I'm </span><span class="name glitch-text" data-text="Rishyendra Akkina.">Rishyendra Akkina.</span></h1>
+                    <p class="intro-sentence anime-fade-in-up">I'm a Sophomore at NIT Durgapur, majoring in Electronics and Communication Engineering.</p>
+                    <p class="tagline anime-fade-in-up">I create and reverse engineer cool projects, and play cricket when bored.</p>
+                    <div class="social-links anime-fade-in-up">
+                        <a href="#" target="_blank" title="GitHub">[G]</a>
+                        <a href="#" target="_blank" title="Code-something">[C]</a>
+                        <a href="#" target="_blank" title="LinkedIn">[L]</a>
+                    </div>
+                    <a href="#" target="_blank" class="leetcode-link anime-fade-in-up">LeetCode Profile</a>
+                </div>
+                <div class="hero-illustration-container anime-fade-in-up">
+                    {/* This container will be used by Three.js for the central 3D object if #three-canvas-hero isn't ideal for it */}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="scroll-reveal">
+        <div class="container">
+            <h2 class="section-title">Proficiencies</h2>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="technologies">Technologies</button>
+                <button class="tab-button" data-tab="software">Software</button>
+                <button class="tab-button" data-tab="expertise">Expertise</button>
+            </div>
+            <div id="technologies" class="tab-content active"><div class="skills-grid">
+                <div class="skill-item">Typescript</div> <div class="skill-item">NextJS</div>
+                <div class="skill-item">PostgreSQL</div> <div class="skill-item">MongoDB</div>
+                <div class="skill-item">Websockets</div> <div class="skill-item">Prisma ORM</div>
+                <div class="skill-item">NodeJS / Express</div><div class="skill-item">Python</div>
+            </div></div>
+            <div id="software" class="tab-content"><div class="skills-grid">
+                <div class="skill-item">VS Code</div> <div class="skill-item">Git & GitHub</div>
+                <div class="skill-item">Docker</div> <div class="skill-item">Figma (Basics)</div>
+                <div class="skill-item">Postman</div> <div class="skill-item">Linux Shell</div>
+            </div></div>
+            <div id="expertise" class="tab-content"><div class="skills-grid">
+                <div class="skill-item">Full-Stack Web Dev</div> <div class="skill-item">API Design</div>
+                <div class="skill-item">System Architecture</div><div class="skill-item">Problem Solving</div>
+                <div class="skill-item">DevOps (CI/CD Basics)</div> <div class="skill-item">Cybersecurity Concepts</div>
+            </div></div>
+        </div>
+    </section>
+
+    <section id="projects" class="scroll-reveal">
+        <div class="container">
+            <h2 class="section-title">Creations</h2>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="featured">★ Featured</button>
+                <button class="tab-button" data-tab="working">In Progress</button>
+                <button class="tab-button" data-tab="past">Archive</button>
+            </div>
+            <div id="featured" class="tab-content active"><div class="projects-grid">
+                <div class="project-card"><h3>Project Cybersync</h3><p>A real-time collaborative coding platform with integrated chat and video conferencing, built with WebSockets and WebRTC.</p><div class="project-tags"><span>Typescript</span><span>NextJS</span><span>Websockets</span></div><div class="project-links"><a href="#">Live Demo</a> <a href="#">Source Code</a></div></div>
+                <div class="project-card"><h3>NeuralNet Visualizer</h3><p>Interactive tool to build and visualize simple neural network architectures, demonstrating data flow and activation functions.</p><div class="project-tags"><span>Python</span><span>Three.js</span><span>Flask</span></div><div class="project-links"><a href="#">Explore</a></div></div>
+            </div></div>
+            <div id="working" class="tab-content"><div class="projects-grid">
+                 <div class="project-card"><h3>Portfolio OS v3</h3><p>The next iteration of this personal website, exploring generative art backgrounds and more complex 3D interactions.</p><div class="project-tags"><span>Anime.js</span><span>Three.js</span><span>GLSL</span></div></div>
+            </div></div>
+            <div id="past" class="tab-content"><div class="projects-grid">
+                <div class="project-card"><h3>DataStream Analyzer</h3><p>A backend service for ingesting and analyzing IoT sensor data streams, providing real-time anomaly detection.</p><div class="project-tags"><span>Node.js</span><span>Kafka</span><span>PostgreSQL</span></div></div>
+            </div></div>
+        </div>
+    </section>
+
+    <section id="contact" class="scroll-reveal">
+        <div class="container">
+            <h2 class="section-title">Connect</h2>
+            <p style="text-align: center; margin-bottom: 40px; color: var(--secondary-text-color); font-size: 1.1rem;">Interested in collaborating or have a query? Reach out!</p>
+            <form id="contact-form">
+                <div class="name-group">
+                    <div class="form-group"><label for="first-name">First Name</label><input type="text" id="first-name" name="firstName" required></div>
+                    <div class="form-group"><label for="last-name">Last Name</label><input type="text" id="last-name" name="lastName" required></div>
+                </div>
+                <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" name="email" required></div>
+                <div class="form-group"><label for="subject">Subject</label><input type="text" id="subject" name="subject"></div>
+                <div class="form-group"><label for="message">Your Message</label><textarea id="message" name="message" rows="6" required></textarea></div>
+                <button type="submit" class="submit-btn">Transmit Message</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>© <span id="current-year"></span> Rishyendra Akkina. System Online // Version: DEV_ANIM_2.1</p>
+        <p>Compiled with <span style="color:var(--accent-color)">大量的咖啡因</span> and <span style="color:var(--secondary-text-color)">/* many many comments */</span></p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // --- Custom Cursor ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        let lastCursorMove = 0;
+        const CURSOR_UPDATE_THRESHOLD = 16; // Roughly 60fps
+
+        function updateCursorPosition(e) {
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+            cursorOutline.style.left = e.clientX + 'px';
+            cursorOutline.style.top = e.clientY + 'px';
+        }
+        
+        window.addEventListener('mousemove', (e) => {
+            const now = performance.now();
+            if (now - lastCursorMove > CURSOR_UPDATE_THRESHOLD) {
+                 updateCursorPosition(e);
+                 lastCursorMove = now;
+            }
+        });
+        // Initial position update in case mouse doesn't move right away
+        // but for hidden cursor might not be strictly needed
+        // requestAnimationFrame(() => updateCursorPosition({clientX: window.innerWidth / 2, clientY: window.innerHeight / 2}));
+
+
+        // --- Mobile Nav ---
+        const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
+        const navLinksUl = document.getElementById('nav-links');
+        const header = document.querySelector('header'); // Defined for scroll active link
+        mobileNavToggle.addEventListener('click', () => navLinksUl.classList.toggle('active'));
+        navLinksUl.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinksUl.classList.contains('active') && navLinksUl.classList.remove('active'));
+        });
+
+        // --- Active Nav Link Highlighting on Scroll ---
+        const sections = document.querySelectorAll('section[id]');
+        const navLi = document.querySelectorAll('nav ul li a.nav-link');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - (header.offsetHeight + 70) ) { // Adjusted offset
+                    current = section.getAttribute('id');
+                }
+            });
+            navLi.forEach(a => {
+                a.classList.remove('active-link');
+                if (a.getAttribute('href') && a.getAttribute('href').includes(current)) { // Check if href exists
+                    a.classList.add('active-link');
+                }
+            });
+            if (!current && navLi.length > 0) { // Default to home if at top and home link exists
+                 const homeLink = Array.from(navLi).find(a => a.getAttribute('href') === '#hero');
+                 if (homeLink) homeLink.classList.add('active-link');
+            }
+        });
+        // Set initial active link
+        if (navLi.length > 0 && window.location.hash) {
+            const currentHash = window.location.hash;
+            navLi.forEach(a => {
+                if (a.getAttribute('href') === currentHash) {
+                    a.classList.add('active-link');
+                }
+            });
+        } else if (navLi.length > 0) {
+             const homeLink = Array.from(navLi).find(a => a.getAttribute('href') === '#hero');
+             if (homeLink) homeLink.classList.add('active-link');
+        }
+
+
+        // --- Tabs Functionality ---
+        const tabContainers = document.querySelectorAll('section .tabs');
+        tabContainers.forEach(tabContainer => {
+            const tabButtons = tabContainer.querySelectorAll('.tab-button');
+            // Get the container of all tab contents, typically the next sibling element of the .tabs div
+            const tabContentsParent = tabContainer.parentElement.querySelector('.tab-content')?.parentElement || tabContainer.nextElementSibling;
+
+            if(!tabContentsParent) return;
+            
+            const tabContents = Array.from(tabContentsParent.children).filter(child => child.classList.contains('tab-content'));
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const targetTab = button.dataset.tab;
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === targetTab) {
+                            content.classList.add('active');
+                            anime({
+                                targets: `#${targetTab} .skill-item, #${targetTab} .project-card`,
+                                translateY: [20, 0], opacity: [0, 1], // Reduced translate
+                                delay: anime.stagger(60, { start: 50 }), // Reduced stagger/delay
+                                easing: 'easeOutQuad', duration: 400 // Faster animation
+                            });
+                        }
+                    });
+                });
+            });
+            // Initial animation for default active tab
+            const activeDefaultTabBtn = tabContainer.querySelector('.tab-button.active');
+            if(activeDefaultTabBtn){
+                const targetTabId = activeDefaultTabBtn.dataset.tab;
+                const activeContent = tabContentsParent.querySelector(`#${targetTabId}`); // Scope to parent
+                if (activeContent) {
+                    activeContent.classList.add('active');
+                    anime({
+                        targets: `#${targetTabId} .skill-item, #${targetTabId} .project-card`,
+                        translateY: [20, 0], opacity: [0, 1],
+                        delay: anime.stagger(60, { start: 200 }),
+                        easing: 'easeOutQuad', duration: 400
+                    });
+                }
+            }
+        });
+
+        // --- Anime.js Hero Text Animations ---
+        anime({
+            targets: '.hero-text h1 .anime-lines-κάλύτερα',
+            opacity: [0,1],
+            translateY: ['1em', 0], // Slightly less translate
+            translateZ: 0,
+            rotateX: [-45, 0], // Less rotation
+            duration: 800,
+            delay: 200,
+            easing: 'easeOutExpo',
+        });
+        
+        const nameSpan = document.querySelector('.hero-text h1 .name');
+        if (nameSpan) {
+            nameSpan.innerHTML = nameSpan.textContent.replace(/\S/g, "<span class='letter' style='display:inline-block; opacity:0;'>$&</span>");
+            anime.timeline({loop: false, delay: 700})
+                .add({
+                    targets: '.hero-text h1 .name .letter',
+                    opacity: [0,1],
+                    translateX: [15,0], // Less translate
+                    translateZ: 0,
+                    scaleX: [0.7, 1], // Less scale
+                    easing: "easeOutExpo",
+                    duration: 700,
+                    delay: anime.stagger(40) // Faster stagger
+                });
+        }
+
+        anime({
+            targets: '.hero-text .intro-sentence, .hero-text .tagline, .hero-text .social-links, .hero-text .leetcode-link, .hero-illustration-container',
+            opacity: [0, 1],
+            translateY: [20, 0], // Less translate
+            delay: anime.stagger(100, {start: 1000}),
+            easing: 'easeOutExpo',
+            duration: 700
+        });
+
+
+        // --- Glitch Text Effect on Hover (remains good for dev-anime) ---
+        const glitchElements = document.querySelectorAll('.glitch-text');
+        const glitchChars = '><=\\/+*#%&_01?'; // Slightly adjusted chars
+        glitchElements.forEach(el => {
+            const originalText = el.dataset.text || el.textContent;
+            let intervalId = null;
+            el.addEventListener('mouseenter', () => {
+                let iteration = 0;
+                clearInterval(intervalId);
+                intervalId = setInterval(() => {
+                    el.textContent = originalText.split("")
+                        .map((letter, index) => {
+                            if(index < iteration) return originalText[index];
+                            if(letter === ' ') return ' '; // Preserve spaces
+                            return glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                        })
+                        .join("");
+                    if(iteration >= originalText.length) {
+                        clearInterval(intervalId);
+                        el.textContent = originalText; // Ensure it reverts if mouse leaves mid-glitch
+                    }
+                    iteration += 1 / 2; // Slightly faster
+                }, 30); // Faster interval
+            });
+            el.addEventListener('mouseleave', () => {
+                clearInterval(intervalId);
+                el.textContent = originalText;
+            });
+        });
+
+
+        // --- Scroll Reveal ---
+        const scrollRevealElements = document.querySelectorAll('.scroll-reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Animate children of section if needed, or just the section itself
+                    // Current style has scroll-reveal on section, and transition for its visibility
+                    // If animating children (like cards):
+                    // anime({
+                    //     targets: entry.target.querySelectorAll('.skill-item, .project-card, #contact-form > div, #contact-form > button'),
+                    //     opacity: [0,1],
+                    //     translateY: [20,0], // Less translate
+                    //     delay: anime.stagger(80, {start: 100}), // Faster
+                    //     easing: 'easeOutExpo', duration: 600
+                    // });
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 }); // Lower threshold
+        scrollRevealElements.forEach(el => revealObserver.observe(el));
+
+        // --- Contact Form ---
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Simulate submission
+                const submitBtn = contactForm.querySelector('.submit-btn');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'TRANSMITTING...';
+                submitBtn.disabled = true;
+                setTimeout(() => {
+                    submitBtn.textContent = 'TRANSMISSION OK ✓';
+                     setTimeout(() => {
+                        contactForm.reset();
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, 1500);
+                }, 1000);
+            });
+        }
+
+        // --- Three.js Hero Background ---
+        const heroCanvasContainer = document.getElementById('three-canvas-hero');
+        if (heroCanvasContainer && window.THREE) {
+            let scene, camera, renderer, particles, centralObject;
+            const particleCount = 1500; // Reduced particle count for minimalism
+            let mouseX = 0, mouseY = 0;
+            let windowHalfX = window.innerWidth / 2;
+            let windowHalfY = window.innerHeight / 2;
+
+            function initThreeHero() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 40; // Closer camera for potentially larger elements view
+
+                renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio > 1.5 ? 1.5 : window.devicePixelRatio); // Cap pixel ratio for performance
+                heroCanvasContainer.appendChild(renderer.domElement);
+
+                const pGeometry = new THREE.BufferGeometry();
+                const pPositions = new Float32Array(particleCount * 3);
+                const pColors = new Float32Array(particleCount * 3);
+                // Use the new accent color for particles
+                const accentColorTHREE = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim());
+                const secondaryColorTHREE = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--secondary-text-color').trim());
+
+
+                for (let i = 0; i < particleCount; i++) {
+                    pPositions[i * 3] = (Math.random() - 0.5) * 120; // Adjusted spread
+                    pPositions[i * 3 + 1] = (Math.random() - 0.5) * 120;
+                    pPositions[i * 3 + 2] = (Math.random() - 0.5) * 120;
+                    
+                    const particleColor = Math.random() > 0.7 ? accentColorTHREE : secondaryColorTHREE.lerp(accentColorTHREE, Math.random() * 0.3);
+                    pColors[i*3] = particleColor.r;
+                    pColors[i*3+1] = particleColor.g;
+                    pColors[i*3+2] = particleColor.b;
+                }
+                pGeometry.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+                pGeometry.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
+                
+                const pMaterial = new THREE.PointsMaterial({
+                    size: 0.12, // Smaller particles
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.7, // Adjusted opacity
+                    blending: THREE.NormalBlending, // Changed from AdditiveBlending
+                    sizeAttenuation: true,
+                    depthWrite: false
+                });
+                particles = new THREE.Points(pGeometry, pMaterial);
+                scene.add(particles);
+
+                const cGeometry = new THREE.IcosahedronGeometry(7, 0); // Slightly smaller
+                const cMaterial = new THREE.MeshBasicMaterial({
+                    color: accentColorTHREE, // Use new accent color
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.6 // Adjusted opacity
+                });
+                centralObject = new THREE.Mesh(cGeometry, cMaterial);
+                scene.add(centralObject);
+
+                document.addEventListener('mousemove', onDocumentMouseMoveHero, false);
+                window.addEventListener('resize', onWindowResizeHero, false);
+                animateThreeHero();
+            }
+
+            function onDocumentMouseMoveHero(event) {
+                mouseX = (event.clientX - windowHalfX) / 7; // Further reduced sensitivity
+                mouseY = (event.clientY - windowHalfY) / 7;
+            }
+
+            function onWindowResizeHero() {
+                windowHalfX = window.innerWidth / 2;
+                windowHalfY = window.innerHeight / 2;
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio > 1.5 ? 1.5 : window.devicePixelRatio);
+            }
+
+            let lastFrameTime = 0;
+            const fpsLimit = 30; // Limit FPS for performance if needed
+            const frameInterval = 1000 / fpsLimit;
+
+            function animateThreeHero(currentTime) {
+                requestAnimationFrame(animateThreeHero);
+                
+                // FPS Limiting
+                // const elapsed = currentTime - lastFrameTime;
+                // if (fpsLimit > 0 && elapsed < frameInterval) {
+                //     return;
+                // }
+                // lastFrameTime = currentTime - (elapsed % frameInterval);
+
+                const time = Date.now() * 0.00005; // Slower overall animation
+
+                if (particles) {
+                    particles.rotation.x += 0.0001 + mouseY * 0.000005; // Slower rotation
+                    particles.rotation.y += 0.00015 + mouseX * 0.000005;
+                    // Removed particle pulsing for minimalism
+                    // const pulse = Math.sin(time * 3) * 0.02 + 0.12; // Milder pulse
+                    // particles.material.size = pulse;
+                }
+
+                if (centralObject) {
+                    centralObject.rotation.x = time * 0.2; // Slower
+                    centralObject.rotation.y = time * 0.3;
+                    centralObject.rotation.z = time * 0.15;
+                    
+                    centralObject.position.x += (mouseX * 0.001 - centralObject.position.x) * 0.03; // Slower follow
+                    centralObject.position.y += (-mouseY * 0.001 - centralObject.position.y) * 0.03;
+                }
+                
+                if(camera){
+                    camera.position.x += (mouseX * 0.05 - camera.position.x) * 0.01; // Slower camera follow
+                    camera.position.y += (-mouseY * 0.05 - camera.position.y) * 0.01;
+                    camera.lookAt(scene.position);
+                }
+
+
+                if (renderer) renderer.render(scene, camera);
+            }
+            
+            try { initThreeHero(); }
+            catch(e) { console.error("Three.js (Hero) failed:", e); if(heroCanvasContainer) heroCanvasContainer.style.display = 'none'; }
+        } else {
+            if(heroCanvasContainer) heroCanvasContainer.style.display = 'none';
+        }
+    });
+    </script>
+</body>
+</html>
